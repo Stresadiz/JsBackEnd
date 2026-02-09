@@ -1,19 +1,22 @@
 const express = require('express');
+const { login } = require('./login');
+
 const app = express();
-const port = 3000;
+const PORT = 3000;
 
-app.get('/Home/', (req, res) => {
-  res.send('Hello World!');
+app.use(express.json());
+
+app.get('/api/login', (req, res) => {
+  const {username, password} = req.body;
+
+  const isValid = login(username, password);
+
+  if (isValid) {
+    res.json({ message: 'Login successful' });
+  } else {
+    res.status(401).json({ mensaje: "Credenciales inválidas", status: "error" });  }
 });
 
-app.get('/api/status/', (req, res) => {
-  res.json({
-     status: "Online",
-     message: "Server is running smoothly",
-     user: "Admin"
-    });
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}/Home`);
+app.listen(PORT, () => {
+  console.log(`Example app listening at http://localhost:${PORT}`);
 });
