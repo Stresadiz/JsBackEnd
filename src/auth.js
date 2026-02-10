@@ -1,36 +1,49 @@
-let users = [
-    {
-        "userEmail": "mail@admin.com",
-        "userName":"admin",
-        "userPass":"admin123"
+const { connectDB } = require('./database');
+const bcrypt = require('bcrypt')
+const saltRounds = 10;
+
+async function registerUser(newUser) {
+    const db = await connectDB();
+
+    const isValid = verifyEmail(newUser.userEmail)
+
+    if (isValid) {
+        try {
+
+            const hashedPass = await bcrypt.hash(newUser.userPass, saltRounds);
+
+            await db.run(
+                'INSERT INTO users (userEmail, userName, userPass) VALUES (?, ?, ?)',
+                [newUser.userEmail, newUser.userName, hashedPass]
+            );
+
+            return true
+        } catch (error) {
+            return false    
+        }
     }
-]
+    
+    return false
+}
 
-function registerUser(newUser) {
-    let mailVerified = verifyEmail(newUser.userEmail)
-    let userNotExist = !userAlreadyExists(newUser)
+function verifyEmail(mail) {
+    return mail.includes("@")
+}
 
-    if (mailVerified && userNotExist) {
-        
-        users.push(newUser)    
-        return true
+async function userLogin(username, password) {
+    const db = await connectDB();
 
-    } else{
+    const user = await db.get(
+        'SELECT * FROM users WHERE userName = ?',
+        [username]
+    );
 
-        return false
+    if (user) {
+        const match = await bcrypt.compare(password, user.userPass)
+        return match
     }
+    
+    return false
 }
 
-function userAlreadyExists(newUser) {
-
-    return users.some(usr => newUser.userName === usr.userName &&
-         newUser.userPass === usr.userPass);
-}
-
-function verifyEmail(userEmail) {
-
-    return userEmail.includes("@")
-}
-
-
-module.exports = { registerUser, userAlreadyExists, verifyEmail }
+module.exports = { registerUser, userLogin}
