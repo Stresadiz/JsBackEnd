@@ -1,0 +1,27 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Descargar el código de este repo
+      uses: actions/checkout@v4
+
+    - name: 2. Configurar Node.js (versión 20)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: 3. Instalar las librerías (Express, SQLite, Bcrypt, Jest)
+      run: npm install
+
+    - name: 5. Ejecutar los tests
+      run: npm test
