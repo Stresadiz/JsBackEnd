@@ -1,6 +1,14 @@
 const {userLogin, registerUser} = require('../auth');
+const {connectDB} = require('../database');
+
 const User = require('../modules/User');
+
 let rndNum = Math.floor(Math.random() * 100) + 1;
+
+beforeAll(async () => {
+    const db = await connectDB();
+    await db.run('DELETE FROM users');
+});
 
 test('Login con credenciales incorrectas', async () => {
     const result = await userLogin('admin123', 'admin1sdsd23');
